@@ -11,35 +11,61 @@
 
 
 
-size_t my_strlen(char *string){
-  int c = 0;
-  while(string[c]!='\0'){
-    c++;
-  }
-
-  return ++c;
-}
-
 int main(int argc, char** argv){
   //working directory string size + '\0' 
-  char wd[WD_STRING_SIZE+1];
+  char *wd = (char*)malloc(sizeof(char)*WD_STRING_SIZE+1);
+  getcwd(wd,WD_STRING_SIZE);
+
   //REPL 
   while(1){
-    getcwd(wd,WD_STRING_SIZE);
-    wd[WD_STRING_SIZE] = '\0';
 
-
-    write(STDOUT_FILENO,wd,my_strlen(wd));
-    write(STDOUT_FILENO,"->",sizeof("->"));
+    
+    write(STDOUT_FILENO,wd,strlen(wd));
+    write(STDOUT_FILENO,"->",2);
+  
+    
     
     char *com = command();
 
-    if(strcmp(com,"`") == 0){
-      free(com);
+    
+    
+
+    char **tokens = tokenize_command(com);
+    
+
+    size_t token_count = 0;
+    while(tokens[token_count] != NULL) token_count++;
+      if(token_count <= 0){
+//        write(STDOUT_FILENO, "Enter a valid path!\n", 21);
+        // free memory
+        free(com);
+        for(size_t i=0;i<token_count;i++) free(tokens[i]);
+          free(tokens);
+          continue;
+    }
+
+    if(token_count == 0){
+      continue;
+    }
+    
+    if(strcmp(tokens[0],"`") == 0){
       break;
-    }else if(strcmp(com,"list") == 0){
+    }else if(strcmp(tokens[0],"list") == 0){
       list(wd);
-    }      
+    }else if(strcmp(tokens[0],"chd")== 0){
+      if(sizeof(tokens)/sizeof(char*) <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+      char *temp = chd("testdir",wd);
+      if(temp != NULL) {
+        wd = temp;
+      }else{
+        write(STDOUT_FILENO,"No such directory\n",sizeof("No such directory\n"));
+      }
+    }else{
+      write(STDOUT_FILENO,"Unknown command...\n",sizeof("Unknown command...\n"));
+    } 
   }
 
   

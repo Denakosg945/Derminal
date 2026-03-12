@@ -5,11 +5,67 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+//chd = change directory , nwd = new working directory
+//
+char *chd(const char *nwd,const char *cwd){
+  DIR *directory = opendir(cwd);
+  
 
+  if(directory == NULL){ 
+    char *error = strerror(errno);
+    write(STDOUT_FILENO,"1",1);
+    write(STDOUT_FILENO,error,strlen(error));
+    return NULL; 
+  }
+  
+
+
+
+  struct dirent *dir;
+
+  do{
+
+    //Read all directories and print them
+    errno = 0;
+    dir = readdir(directory);
+    if(errno != 0){
+      char *error = strerror(errno);
+      write(STDOUT_FILENO,"2",1);
+      write(STDOUT_FILENO,error,strlen(error));
+      return NULL;
+    }
+    
+    
+
+
+    if(dir != NULL && (strcmp(nwd,dir->d_name)==0) ){
+      char *nwd_string = (char*)malloc(sizeof(char)*strlen(nwd)+sizeof(char)*strlen(cwd));
+      if(nwd_string ==NULL){
+        char *error = strerror(errno);
+        write(STDOUT_FILENO,"3",1);
+        write(STDOUT_FILENO,error,strlen(error));
+        return NULL;
+      }
+    
+
+      strncat(nwd_string,cwd,strlen(cwd));
+      strcat(nwd_string,"/");
+      strncat(nwd_string,nwd,strlen(nwd));
+      return nwd_string;
+    }
+  }while(dir != NULL);
+
+  closedir(directory);
+  return NULL;
+}
+
+
+
+//ls clone 
 void list(const char *wd){
   DIR *directory = opendir(wd);
 
-  if(directory == NULL){ 
+if(directory == NULL){ 
     char *error = strerror(errno);
     write(STDOUT_FILENO,error,strlen(error));
     exit(EXIT_FAILURE);
@@ -45,5 +101,11 @@ void list(const char *wd){
     }
 
   } while(dir != NULL);
+  
+  if(closedir(directory) < 0){
+    char *error = strerror(errno);
+    write(STDOUT_FILENO,error,strlen(error));
+    exit(EXIT_FAILURE);
+  }
 
 }
