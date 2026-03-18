@@ -53,11 +53,14 @@ int main(int argc, char** argv){
     }else if(strcmp(tokens[0],"list") == 0){
       list(wd);
     }else if(strcmp(tokens[0],"chd")== 0){
-      if(sizeof(tokens)/sizeof(char*) <= 1){
+      if(token_count <= 1){
         write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
         continue;
       }
-      char *temp = chd("testdir",wd);
+      char *temp;
+      if(token_count == 2){
+        temp = chd(tokens[1],wd);
+      }
       if(temp != NULL) {
         wd = temp;
       }else{
