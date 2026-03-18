@@ -48,6 +48,9 @@ int main(int argc, char** argv){
       continue;
     }
     
+
+    
+
     if(strcmp(tokens[0],"`") == 0){
       break;
     }else if(strcmp(tokens[0],"list") == 0){
@@ -66,7 +69,30 @@ int main(int argc, char** argv){
       }else{
         write(STDOUT_FILENO,"No such directory\n",sizeof("No such directory\n"));
       }
-    }else{
+    }else if(strcmp(tokens[0], "mkd") == 0){
+      if(token_count <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+
+      if(mkd(tokens[1],wd) == -1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+      write(STDOUT_FILENO,"Directory successfully created!\n",sizeof("Directory successfully created!\n"));
+     }else if(strcmp(tokens[0], "rmd") == 0){
+      if(token_count <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+
+      if(rmd(tokens[1],wd) == -1){
+        write(STDOUT_FILENO,"Enter a valid path and make sure the directory is empty!\n",sizeof("Enter a valid path and make sure the directory is empty!\n"));
+        continue;
+      }
+      write(STDOUT_FILENO,"Directory successfully deleted!\n",sizeof("Directory successfully deleted!\n"));
+    }
+    else{
       write(STDOUT_FILENO,"Unknown command...\n",sizeof("Unknown command...\n"));
     } 
   }

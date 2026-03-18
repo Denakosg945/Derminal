@@ -50,7 +50,7 @@ char *command(){
 
   arr.string[arr.size] = '\0';
   
-    
+     
   return arr.string;
 }
 
@@ -62,16 +62,32 @@ char **tokenize_command(char *cmd){
 
   char *delimiter = " ";
 
-  char **tokens = (char**)malloc(sizeof(char*));
-  int counter = 0;
-  tokens[counter] = strtok(cmd,delimiter);
-  counter++;
 
-  char *token;
-  while((token = strtok(NULL,delimiter)) != NULL){
-    tokens[counter] = token;
-    counter++;
+  int capacity = 2;
+  int counter = 0;
+  char **tokens = (char**)malloc(sizeof(char*)*capacity);
+  
+
+  char *token = strtok(cmd,delimiter);
+  while(token != NULL){
+    if(counter >= capacity){
+      capacity *= 2;
+      char **tmp = (char**)realloc(tokens,capacity*sizeof(char));
+
+      if(!tokens){
+        free(tokens);
+        return NULL;
+      }
+
+      tokens = tmp;
+    }
+
+    tokens[counter++] = token;
+    token = strtok(NULL,delimiter);
   }
+
+  tokens = (char**)realloc(tokens,sizeof(char)*counter+1);
+  tokens[counter] = '\0';
 
   return tokens;
 }
