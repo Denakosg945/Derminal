@@ -72,14 +72,13 @@ char **tokenize_command(char *cmd){
   while(token != NULL){
     if(counter >= capacity){
       capacity *= 2;
-      char **tmp = (char**)realloc(tokens,capacity*sizeof(char));
+      tokens = realloc(tokens,sizeof(char*)*capacity);
 
       if(!tokens){
         free(tokens);
         return NULL;
       }
 
-      tokens = tmp;
     }
 
     tokens[counter++] = token;

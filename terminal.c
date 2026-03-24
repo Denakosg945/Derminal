@@ -26,7 +26,6 @@ int main(int argc, char** argv){
     
     
     char *com = command();
-
     
     
 
@@ -48,9 +47,8 @@ int main(int argc, char** argv){
       continue;
     }
     
-
-    
-
+            
+   
     if(strcmp(tokens[0],"`") == 0){
       break;
     }else if(strcmp(tokens[0],"list") == 0){
@@ -96,8 +94,7 @@ int main(int argc, char** argv){
         write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
         continue;
       }
-
-
+      
       start(tokens[1],tokens+1);
        
 
