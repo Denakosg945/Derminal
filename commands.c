@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
-
+#include <sys/wait.h>
 //chd = change directory , nwd = new working directory
 //
 char *chd(const char *nwd,const char *cwd){
@@ -29,6 +29,33 @@ char *chd(const char *nwd,const char *cwd){
     strcpy(dire,nwd);
     closedir(directory);
     return dire;
+  }
+
+  if(strcmp("..",nwd) == 0){
+    //return the previous dir 
+    char *tmp_cwd = (char*)malloc(sizeof(char)*strlen(cwd)+1);
+    if(!tmp_cwd){
+      return NULL;
+    }
+    strcpy(tmp_cwd,cwd);
+    char *last_slash = strrchr(tmp_cwd,'/');
+
+    if(last_slash != NULL){
+      if(last_slash == tmp_cwd){
+        tmp_cwd[1] = '\0';
+      }else{
+        *last_slash = '\0';
+      }
+    }
+    
+    return tmp_cwd;
+  }else if(strcmp(".",nwd) == 0){
+    char *tmp_cwd = (char*)malloc(sizeof(char)*strlen(cwd)+1);
+    if(!tmp_cwd){
+      return NULL;
+    }
+    strcpy(tmp_cwd,cwd);
+    return tmp_cwd;      
   }
   
   directory = opendir(cwd); 
@@ -223,4 +250,29 @@ if(directory == NULL){
     exit(EXIT_FAILURE);
   }
 
+}
+
+
+
+int start(const char *program,char *const argv[]){
+  int id = fork();
+  if(id == -1){
+    char *error = strerror(errno);
+    write(STDOUT_FILENO,error,strlen(error));
+    return id;
+  }else if(id == 0){
+    if(execv(program,argv) == -1){
+      char *error = strerror(errno);
+      write(STDOUT_FILENO,error,strlen(error));
+      write(STDOUT_FILENO,"\n",1);
+      _exit(-1);
+    }
+  }else{
+    int status;
+    waitpid(id,&status,0);
+    
+  }
+
+
+  return 0;
 }

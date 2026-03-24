@@ -91,8 +91,17 @@ int main(int argc, char** argv){
         continue;
       }
       write(STDOUT_FILENO,"Directory successfully deleted!\n",sizeof("Directory successfully deleted!\n"));
-    }
-    else{
+    }else if(strcmp(tokens[0],"start") == 0){
+      if(token_count <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+
+
+      start(tokens[1],tokens+1);
+       
+
+    }else{
       write(STDOUT_FILENO,"Unknown command...\n",sizeof("Unknown command...\n"));
     } 
   }
