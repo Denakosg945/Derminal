@@ -11,7 +11,7 @@
 
 
 
-int main(int argc, char** argv){
+int main(){
   //working directory string size + '\0' 
   char *wd = (char*)malloc(sizeof(char)*WD_STRING_SIZE+1);
   getcwd(wd,WD_STRING_SIZE);
@@ -27,7 +27,13 @@ int main(int argc, char** argv){
     
     char *com = command();
     
-    
+    const char *com_list = "comms - prints the list of the commands\n"
+                           "clear - clears the screen using ANSI sequence (ONLY POSIX)\n"
+                           "list - directories and files in current directory\n"
+                           "chd [PATH] - change directory to path\n"
+                           "mkd [NAME] - create a directory with name in the current directory\n"
+                           "rmd [NAME] - deletes a directory with name in the current directory\n"
+                           "start [PATH] - starts and external program binary\n";
 
     char **tokens = tokenize_command(com);
     
@@ -58,7 +64,7 @@ int main(int argc, char** argv){
         write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
         continue;
       }
-      char *temp;
+      char *temp = NULL;
       if(token_count == 2){
         temp = chd(tokens[1],wd);
       }
@@ -98,7 +104,20 @@ int main(int argc, char** argv){
       start(tokens[1],tokens+1);
        
 
-    }else{
+    }else if(strcmp(tokens[0],"comms") == 0){
+      write(STDOUT_FILENO,com_list,strlen(com_list));
+    }else if(strcmp(tokens[0],"clear") == 0){
+      write(STDOUT_FILENO,"\e[1;1H\e[2J",strlen("\e[1;1H\e[2J"));
+    }else if(strcmp(tokens[0],"cfile") == 0){      
+      if(token_count <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+      
+      cfile(tokens[1],wd);
+       
+    }
+    else{
       write(STDOUT_FILENO,"Unknown command...\n",sizeof("Unknown command...\n"));
     } 
   }

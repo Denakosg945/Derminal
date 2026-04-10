@@ -22,11 +22,7 @@ char *command(){
   char c;
   ssize_t bytesRead = read(STDIN_FILENO,&c,sizeof(char));
   
-  if(bytesRead <= 0){
-    
-    
-    char *error = strerror(errno);
-  }
+  
 
   while(c!='\n'){
     if(arr.size >=arr.capacity){

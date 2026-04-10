@@ -7,6 +7,26 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+
+
+char *join_path(const char *path_A,const char *path_B){
+  size_t length = strlen(path_A) + strlen(path_B) + 2;
+  char *buff = (char*)malloc(length*sizeof(char));
+
+  if(buff == NULL){
+    return NULL;
+  }
+
+  buff[0] = '\0';
+
+  strcat(buff,path_A);
+  strcat(buff,"/");
+  strcat(buff,path_B);
+
+  return buff;
+}
+
 //chd = change directory , nwd = new working directory
 //
 char *chd(const char *nwd,const char *cwd){
@@ -88,22 +108,14 @@ char *chd(const char *nwd,const char *cwd){
 
 
     if(dir != NULL && strcmp(nwd,dir->d_name)==0 && dir->d_type == DT_DIR){
-      char *nwd_string = (char*)malloc(sizeof(char)*strlen(nwd)+sizeof(char)*strlen(cwd)+2);
+      char *nwd_string = join_path(cwd,nwd);
       if(nwd_string ==NULL){
         char *error = strerror(errno);
-        write(STDOUT_FILENO,"3",1);
         write(STDOUT_FILENO,error,strlen(error));
         closedir(directory);
         return NULL;
       }
 
-      nwd_string[0] = '\0';
-    
-
-      strncat(nwd_string,cwd,strlen(cwd));
-      strcat(nwd_string,"/");
-      strncat(nwd_string,nwd,strlen(nwd));
-    
       nwd_string = realloc(nwd_string,strlen(nwd_string)+1);
       nwd_string[strlen(nwd_string)+1] = '\0';
 
@@ -128,7 +140,7 @@ int mkd(const char *name,const char *cwd){
 
   }
 
-  char *new_dir_name = (char*)malloc(strlen(name)*sizeof(char)+strlen(cwd)*sizeof(char)+2);
+  char *new_dir_name = join_path(cwd,name);
   //new_dir_name == NULL
   //
   if(!new_dir_name){
@@ -138,14 +150,6 @@ int mkd(const char *name,const char *cwd){
   }
 
 
-
-  new_dir_name[0] = '\0';
-  strncat(new_dir_name,cwd,strlen(cwd));
-  strcat(new_dir_name,"/");
-  strncat(new_dir_name,name,strlen(name));
-  
-
-  write(STDOUT_FILENO,new_dir_name,strlen(new_dir_name));
   //See man page 7 for inode for magic number 0777
   int new_dir = mkdir(new_dir_name,0777);
   if(new_dir == -1){
@@ -167,9 +171,9 @@ int rmd(const char *name,const char *cwd){
       write(STDOUT_FILENO,error,strlen(error));
       return -1;
     }
-
+  
   }
-  char *dir_to_del = (char*)malloc(strlen(name)*sizeof(char)+strlen(cwd)*sizeof(char)+2);
+  char *dir_to_del = join_path(cwd,name);
   //dir_to_del == NULL
   //
   if(!dir_to_del){
@@ -179,14 +183,8 @@ int rmd(const char *name,const char *cwd){
   }
 
 
-
-  dir_to_del[0] = '\0';
-  strncat(dir_to_del,cwd,strlen(cwd));
-  strcat(dir_to_del,"/");
-  strncat(dir_to_del,name,strlen(name));
   
 
-  write(STDOUT_FILENO,dir_to_del,strlen(dir_to_del));
 
   int removed_dir = rmdir(dir_to_del);
   if(removed_dir == -1){
@@ -220,6 +218,7 @@ if(directory == NULL){
     if(errno != 0){
       char *error = strerror(errno);
       write(STDOUT_FILENO,"Invalid directory!\n",strlen("Invalid directory!\n"));
+      write(STDOUT_FILENO,error,strlen(error));
       return ;
     }
     
@@ -252,7 +251,32 @@ if(directory == NULL){
 
 }
 
+int cfile(char *name,char *cwd){
+  if(name[0] == '/'){
+    int created = open(name,O_WRONLY|O_CREAT|O_TRUNC, 0);
+    if(created < 0){
+      write(STDOUT_FILENO,name,strlen(name));
+      write(STDOUT_FILENO,"open error :",strlen("open error :"));
+      write(STDOUT_FILENO,strerror(errno),strlen(strerror(errno)));
+      return -1;
+    }
+    close(created);
+    return 0;
+  }
 
+  char *new_file_name = join_path(cwd,name);
+
+
+  int created = open(new_file_name,O_WRONLY|O_CREAT|O_TRUNC,0);
+  if(created < 0){
+    write(STDOUT_FILENO,"open error :",strlen("open error :"));
+    write(STDOUT_FILENO,strerror(errno),strlen(strerror(errno)));
+    return -1;
+  }
+  free(new_file_name);
+  close(created);
+  return 0;
+}
 
 int start(const char *program,char *const argv[]){
   int id = fork();
@@ -276,3 +300,5 @@ int start(const char *program,char *const argv[]){
 
   return 0;
 }
+
+
