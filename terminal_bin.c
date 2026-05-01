@@ -31,8 +31,10 @@ int main(){
                            "clear - clears the screen using ANSI sequence (ONLY POSIX)\n"
                            "list - directories and files in current directory\n"
                            "chd [PATH] - change directory to path\n"
-                           "mkd [NAME] - create a directory with name in the current directory\n"
-                           "rmd [NAME] - deletes a directory with name in the current directory\n"
+                           "mkd [PATH] - create a directory in the designated path\n"
+                           "rmd [PATH] - deletes a directory in the deisgnated path\n"
+                           "cfile [PATH] - creates a file in the designated path\n"
+                           "rfile [PATH] - deletes a file from the designated path\n"
                            "start [PATH] - starts and external program binary\n";
 
     char **tokens = tokenize_command(com);
@@ -116,8 +118,14 @@ int main(){
       
       cfile(tokens[1],wd);
        
-    }
-    else{
+    }else if(strcmp(tokens[0],"rfile") == 0){
+      if(token_count <= 1){
+        write(STDOUT_FILENO,"Enter a valid path!\n",sizeof("Enter a valid path!\n"));
+        continue;
+      }
+
+      rfile(tokens[1],wd);
+    }else{
       write(STDOUT_FILENO,"Unknown command...\n",sizeof("Unknown command...\n"));
     } 
   }

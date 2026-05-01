@@ -251,6 +251,31 @@ if(directory == NULL){
 
 }
 
+int rfile(char *name, char *cwd){
+  if(name[0] == '/'){
+    int deleted = unlink(name);
+    
+
+    if(deleted < 0){
+      write(STDOUT_FILENO,"remove error:",strlen("remove error:"));
+      write(STDOUT_FILENO,strerror(errno),strlen(strerror(errno)));
+      return -1;
+    }
+  }
+  char *final_path = join_path(cwd,name);
+  
+  int deleted = unlink(final_path);
+
+  if(deleted < 0){
+    write(STDOUT_FILENO,"remove error:",strlen("remove error:"));
+    write(STDOUT_FILENO,strerror(errno),strlen(strerror(errno)));
+    return -1;
+  }
+
+  free(final_path);
+  return 0;
+}
+
 int cfile(char *name,char *cwd){
   if(name[0] == '/'){
     int created = open(name,O_WRONLY|O_CREAT|O_TRUNC, 0);
